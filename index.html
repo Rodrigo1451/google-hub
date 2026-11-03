@@ -9,39 +9,55 @@
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
+<a class="skip" href="#content" tabindex="0">Pular para os apps</a>
+<div class="wallpaper" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 
-<header class="toolbar">
-  <div class="brand"><div class="brand-dot" aria-hidden="true"></div><span>Google Hub</span></div>
-  <label class="search">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5"/></svg>
-    <input id="q" type="search" placeholder="Buscar apps" autocomplete="off" spellcheck="false" aria-label="Buscar apps">
-    <kbd>⌘K</kbd>
-  </label>
-</header>
+<div class="shell">
+  <nav class="sidebar" aria-label="Seções">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Google Hub</span></div>
+    <ul id="nav" role="list"></ul>
+  </nav>
 
-<main>
-  <div class="hero">
-    <h1 id="greet">Olá.</h1>
-    <p id="date"></p>
+  <div class="stage">
+    <header class="toolbar">
+      <button id="open-palette" class="search-trigger" type="button" tabindex="0" aria-haspopup="dialog" aria-keyshortcuts="Meta+K /">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5"/></svg>
+        <span>Buscar apps</span>
+        <kbd aria-hidden="true">⌘K</kbd>
+      </button>
+    </header>
+
+    <main id="content" tabindex="-1">
+      <div class="hero">
+        <h1 id="greet">Olá.</h1>
+        <p id="date"></p>
+      </div>
+      <div id="sections"></div>
+      <footer class="foot">
+        <p>Os apps abrem numa nova aba do Safari.</p>
+        <p><kbd>⌘K</kbd> buscar · <kbd>←↑→↓</kbd> navegar · <kbd>F</kbd> favoritar · <kbd>⌥←</kbd><kbd>⌥→</kbd> reordenar favoritos</p>
+      </footer>
+    </main>
   </div>
+</div>
 
-  <section id="quickSec">
-    <h2>Criar novo</h2>
-    <div class="quick" id="quick"></div>
-  </section>
+<dialog id="palette" aria-label="Buscar apps">
+  <div class="palette-field">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5"/></svg>
+    <input id="palette-input" type="text" role="combobox" aria-expanded="true" aria-controls="palette-list"
+           aria-autocomplete="list" aria-label="Buscar apps" placeholder="Buscar apps" autocomplete="off" spellcheck="false">
+    <kbd aria-hidden="true">esc</kbd>
+  </div>
+  <p class="palette-hint" id="palette-hint"></p>
+  <ul id="palette-list" role="listbox" aria-label="Resultados"></ul>
+</dialog>
 
-  <section id="favSec">
-    <h2>Favoritos <small>passe o mouse e toque na estrela para fixar</small></h2>
-    <div class="grid" id="fav"></div>
-  </section>
-
-  <div id="cats"></div>
-  <p class="empty" id="empty">Nenhum app encontrado.</p>
-
-  <footer>Tudo abre em uma nova aba do Safari · ⌘K para buscar · Enter abre o primeiro resultado</footer>
-</main>
+<div id="live" class="sr-only" aria-live="polite"></div>
 
 <script src="js/catalog.js"></script>
+<script src="logos/manifest.js"></script>
+<script src="js/search.js"></script>
+<script src="js/favorites.js"></script>
 <script src="js/ui.js"></script>
 </body>
 </html>
