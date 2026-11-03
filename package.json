@@ -4,10 +4,14 @@
   "scripts": {
     "test:unit": "node --test \"tests/unit/*.test.js\"",
     "test:e2e": "playwright test",
-    "test": "npm run test:unit && npm run test:e2e"
+    "test": "npm run test:unit && npm run test:e2e",
+    "build": "bash scripts/build-app.sh",
+    "logos": "bash scripts/fetch-logos.sh"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",
     "@playwright/test": "^1.48.0"
-  }
+  },
+  "description": "Google Hub — launcher nativo para macOS com todos os apps do Google (vibecoded com Claude Code)",
+  "license": "MIT"
 }
