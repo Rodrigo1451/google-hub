@@ -285,3 +285,17 @@ main { max-width: 1100px; padding: 0 32px 72px; outline: none; }
   .tile:hover, .tile:active, .chip:hover, .chip:active { transform: none; }
   html { scroll-behavior: auto; }
 }
+
+/* --- Native macOS app host (data-host="app" injected by the app) ------------------
+   The window itself is real system vibrancy (NSVisualEffectView), so the page goes
+   transparent and drops its fake wallpaper. The title bar is 28px tall and the
+   traffic lights sit inside the floating sidebar, like Tahoe's apps. */
+:root[data-host="app"] body { background: transparent; }
+:root[data-host="app"] .wallpaper { display: none; }
+:root[data-host="app"] .sidebar { padding-top: 44px; }
+:root[data-host="app"] .toolbar { padding-top: 34px; }
+:root[data-host="app"] .skip { top: 40px; }
+@media (max-width: 899px) {
+  :root[data-host="app"] .sidebar { padding-top: 6px; margin-top: 36px; }
+  :root[data-host="app"] .toolbar { top: 92px; padding-top: 10px; }
+}
