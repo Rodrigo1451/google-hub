@@ -1,0 +1,38 @@
+# <id> <url> [<url>...] — first candidate that is >= 64px wins
+gmail https://www.gstatic.com/images/branding/product/2x/gmail_2020q4_48dp.png
+drive https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png
+docs https://www.gstatic.com/images/branding/product/2x/docs_2020q4_48dp.png
+sheets https://www.gstatic.com/images/branding/product/2x/sheets_2020q4_48dp.png
+slides https://www.gstatic.com/images/branding/product/2x/slides_2020q4_48dp.png
+forms https://www.gstatic.com/images/branding/product/2x/forms_2020q4_48dp.png
+keep https://www.gstatic.com/images/branding/product/2x/keep_2020q4_48dp.png
+meet https://www.gstatic.com/images/branding/product/2x/meet_2020q4_48dp.png
+chat https://www.gstatic.com/images/branding/product/2x/chat_2020q4_48dp.png
+sites https://www.gstatic.com/images/branding/product/2x/sites_2020q4_48dp.png
+calendar https://www.gstatic.com/images/branding/product/2x/calendar_2020q4_48dp.png
+contacts https://www.gstatic.com/images/branding/product/2x/contacts_2022_48dp.png
+tasks https://www.gstatic.com/images/branding/product/2x/tasks_48dp.png
+photos https://www.gstatic.com/images/branding/product/2x/photos_48dp.png
+maps https://www.gstatic.com/images/branding/product/2x/maps_48dp.png
+translate https://www.gstatic.com/images/branding/product/2x/translate_48dp.png
+play https://www.gstatic.com/images/branding/product/2x/play_48dp.png
+analytics https://www.gstatic.com/images/branding/product/2x/analytics_48dp.png
+one https://www.gstatic.com/images/branding/product/2x/one_48dp.png
+earth https://www.gstatic.com/images/branding/product/2x/earth_48dp.png
+classroom https://www.gstatic.com/images/branding/product/2x/classroom_48dp.png
+news https://www.gstatic.com/images/branding/product/2x/news_48dp.png
+looker https://www.gstatic.com/images/branding/product/2x/data_studio_48dp.png https://www.google.com/s2/favicons?sz=128&domain=lookerstudio.google.com
+youtube https://www.google.com/s2/favicons?sz=128&domain=www.youtube.com
+ytmusic https://www.google.com/s2/favicons?sz=128&domain=music.youtube.com
+gemini https://www.google.com/s2/favicons?sz=128&domain=gemini.google.com
+notebooklm https://www.google.com/s2/favicons?sz=128&domain=notebooklm.google.com
+ads https://www.gstatic.com/images/branding/product/2x/ads_48dp.png https://www.google.com/s2/favicons?sz=128&domain=ads.google.com
+business https://www.gstatic.com/images/branding/product/2x/business_48dp.png https://www.google.com/s2/favicons?sz=128&domain=business.google.com
+search https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png https://www.google.com/s2/favicons?sz=128&domain=www.google.com
+searchconsole https://www.gstatic.com/images/branding/product/2x/search_console_48dp.png https://www.google.com/s2/favicons?sz=128&domain=search.google.com
+account https://www.gstatic.com/images/branding/product/2x/account_48dp.png https://www.google.com/s2/favicons?sz=128&domain=myaccount.google.com
+wallet https://www.gstatic.com/images/branding/product/2x/wallet_48dp.png https://www.google.com/s2/favicons?sz=128&domain=wallet.google.com
+passwords https://www.gstatic.com/images/branding/product/2x/password_manager_48dp.png https://www.google.com/s2/favicons?sz=128&domain=passwords.google.com
+scholar https://www.gstatic.com/images/branding/product/2x/scholar_48dp.png https://www.google.com/s2/favicons?sz=128&domain=scholar.google.com
+trends https://www.gstatic.com/images/branding/product/2x/trends_48dp.png https://www.google.com/s2/favicons?sz=128&domain=trends.google.com
+finance https://www.gstatic.com/images/branding/product/2x/finance_48dp.png https://www.google.com/s2/favicons?sz=128&domain=www.google.com/finance
