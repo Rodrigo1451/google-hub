@@ -47,7 +47,7 @@
         <span class="tile-icon">${appIcon(app)}</span>
         <span class="tile-label">${esc(app.n)}</span>
       </a>
-      <button class="tile-fav" type="button" tabindex="0" data-fav="${app.id}" aria-pressed="${on}" aria-label="Favoritar ${esc(app.n)}" title="${on ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">${star(on)}</button>
+      <button class="tile-fav" type="button" tabindex="-1" data-fav="${app.id}" aria-pressed="${on}" aria-label="Favoritar ${esc(app.n)}" title="${on ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">${star(on)}</button>
     </li>`;
   };
 
@@ -93,7 +93,11 @@
     favs = next;
     GH.favs.save(storage, favs);
     render();
-    if (focusSel) document.querySelector(focusSel)?.focus();
+    // focusSel: selector or ordered list of selectors — the first one that matches gets focus
+    for (const sel of [].concat(focusSel || [])) {
+      const el = document.querySelector(sel);
+      if (el) { el.focus(); break; }
+    }
   }
   function toggleFav(id, focusSel) {
     const adding = !favs.includes(id);
@@ -106,7 +110,7 @@
     const sec = b.closest('section').id;
     const id = b.dataset.fav;
     // keep focus on the same control; if it left Favoritos, fall back to its category copy
-    toggleFav(id, `#${sec} .tile-fav[data-fav="${id}"], #sec-${slug(byId[id].cat)} .tile-fav[data-fav="${id}"]`);
+    toggleFav(id, [`#${sec} .tile-fav[data-fav="${id}"]`, `#sec-${slug(byId[id].cat)} .tile-fav[data-fav="${id}"]`]);
   });
 
   /* ---------- sidebar scroll-spy ---------- */
