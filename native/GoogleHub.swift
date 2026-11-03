@@ -2,7 +2,8 @@
 // A real window with system vibrancy (NSVisualEffectView) hosting the bundled web dashboard
 // in a transparent WKWebView. Every web link leaves the window and opens in Safari.
 //
-// Build: scripts/build-app.sh   Self-test: "Google Hub.app/Contents/MacOS/GoogleHub" --selftest
+// Build: scripts/build-app.sh
+// Self-test: "Google Hub.app/Contents/MacOS/GoogleHub" --selftest   (add --snapshot <file.png> to capture the window)
 
 import AppKit
 import WebKit
@@ -32,26 +33,21 @@ func openInSafari(_ url: URL) {
     }
 }
 
-// MARK: - Title-bar drag strip
-// The web view covers the whole window (full-size content), so this transparent strip
-// restores dragging the window by its title bar. It forwards double-clicks to zoom.
-
-final class DragStrip: NSView {
-    override func mouseDown(with event: NSEvent) {
-        if event.clickCount == 2 { window?.performZoom(nil) } else { window?.performDrag(with: event) }
-    }
-    override var mouseDownCanMoveWindow: Bool { true }
-}
-
 // MARK: - Window controller
 
-final class HubController: NSObject, WKNavigationDelegate, WKUIDelegate {
+final class HubController: NSObject, WKNavigationDelegate, WKUIDelegate, NSToolbarDelegate, NSWindowDelegate {
     let window: NSWindow
     let webView: WKWebView
     let selfTest: Bool
+    let snapshotPath: String?
+    static let searchItem = NSToolbarItem.Identifier("search")
 
-    init(selfTest: Bool) {
+    /// Traffic lights sit inside the floating sidebar: page sidebar is inset 8pt, lights 16pt further in.
+    static let trafficLightInset: CGFloat = 24
+
+    init(selfTest: Bool, snapshotPath: String?) {
         self.selfTest = selfTest
+        self.snapshotPath = snapshotPath
         window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1180, height: 820),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
@@ -64,6 +60,7 @@ final class HubController: NSObject, WKNavigationDelegate, WKUIDelegate {
         window.minSize = NSSize(width: 720, height: 520)
         window.setFrameAutosaveName("GoogleHubMain")
         window.tabbingMode = .disallowed
+        window.titlebarSeparatorStyle = .none
 
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .default() // favorites (localStorage) persist between launches
@@ -74,6 +71,15 @@ final class HubController: NSObject, WKNavigationDelegate, WKUIDelegate {
         super.init()
         webView.navigationDelegate = self
         webView.uiDelegate = self
+        window.delegate = self
+
+        // Unified toolbar: standard 52pt title bar, traffic lights vertically centred, native search button.
+        let toolbar = NSToolbar(identifier: "GoogleHubToolbar")
+        toolbar.delegate = self
+        toolbar.displayMode = .iconOnly
+        toolbar.allowsUserCustomization = false
+        window.toolbar = toolbar
+        window.toolbarStyle = .unified
 
         // Real macOS glass behind the page.
         let glass = NSVisualEffectView()
@@ -81,12 +87,10 @@ final class HubController: NSObject, WKNavigationDelegate, WKUIDelegate {
         glass.blendingMode = .behindWindow
         glass.state = .followsWindowActiveState
 
-        let strip = DragStrip()
-        for v in [glass, webView, strip] as [NSView] { v.translatesAutoresizingMaskIntoConstraints = false }
+        for v in [glass, webView] as [NSView] { v.translatesAutoresizingMaskIntoConstraints = false }
         let root = NSView()
         root.addSubview(glass)
         root.addSubview(webView)
-        root.addSubview(strip)
         NSLayoutConstraint.activate([
             glass.leadingAnchor.constraint(equalTo: root.leadingAnchor),
             glass.trailingAnchor.constraint(equalTo: root.trailingAnchor),
@@ -96,14 +100,58 @@ final class HubController: NSObject, WKNavigationDelegate, WKUIDelegate {
             webView.trailingAnchor.constraint(equalTo: root.trailingAnchor),
             webView.topAnchor.constraint(equalTo: root.topAnchor),
             webView.bottomAnchor.constraint(equalTo: root.bottomAnchor),
-            // leave the traffic lights (≈ first 80pt) clickable
-            strip.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 80),
-            strip.trailingAnchor.constraint(equalTo: root.trailingAnchor),
-            strip.topAnchor.constraint(equalTo: root.topAnchor),
-            strip.heightAnchor.constraint(equalToConstant: 28),
         ])
         window.contentView = root
         if !window.setFrameUsingName("GoogleHubMain") { window.center() }
+        layoutTrafficLights()
+    }
+
+    // MARK: Toolbar
+
+    func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] { [.flexibleSpace, Self.searchItem] }
+    func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] { [.flexibleSpace, Self.searchItem] }
+    func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier id: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
+        guard id == Self.searchItem else { return nil }
+        let item = NSToolbarItem(itemIdentifier: id)
+        item.label = "Buscar apps"
+        item.toolTip = "Buscar apps (⌘K)"
+        item.image = NSImage(systemSymbolName: "magnifyingglass", accessibilityDescription: "Buscar apps")
+        item.isBordered = true
+        item.target = self
+        item.action = #selector(openSearch(_:))
+        return item
+    }
+    @objc func openSearch(_ sender: Any?) { webView.evaluateJavaScript("GH.palette && GH.palette.open()") }
+
+    // MARK: Traffic lights
+
+    /// Shift the close/minimise/zoom buttons right so they sit inside the floating sidebar instead of on its corner.
+    /// AppKit re-lays them out on resize, focus and full-screen changes, so this runs after each of those.
+    func layoutTrafficLights() {
+        let types: [NSWindow.ButtonType] = [.closeButton, .miniaturizeButton, .zoomButton]
+        let buttons = types.compactMap { window.standardWindowButton($0) }
+        guard buttons.count == 3 else { return }
+        let spacing = buttons[1].frame.minX - buttons[0].frame.minX
+        guard spacing > 0 else { return }
+        for (i, b) in buttons.enumerated() {
+            var f = b.frame
+            f.origin.x = Self.trafficLightInset + CGFloat(i) * spacing
+            b.setFrameOrigin(f.origin)
+        }
+    }
+    func windowDidResize(_ n: Notification) { layoutTrafficLights() }
+    func windowDidBecomeKey(_ n: Notification) { layoutTrafficLights() }
+    func windowDidResignKey(_ n: Notification) { layoutTrafficLights() }
+    func windowDidExitFullScreen(_ n: Notification) { layoutTrafficLights() }
+    func windowDidEndLiveResize(_ n: Notification) { layoutTrafficLights() }
+
+    /// Traffic-light rect in top-left-origin window points (same space as CSS px at zoom 1).
+    func trafficLightsRect() -> CGRect? {
+        let bs = [NSWindow.ButtonType.closeButton, .zoomButton].compactMap { window.standardWindowButton($0) }
+        guard bs.count == 2, let content = window.contentView else { return nil }
+        let a = bs[0].convert(bs[0].bounds, to: nil), z = bs[1].convert(bs[1].bounds, to: nil)
+        let h = content.frame.height
+        return CGRect(x: a.minX, y: h - a.maxY, width: z.maxX - a.minX, height: a.height)
     }
 
     func load() {
@@ -138,7 +186,10 @@ final class HubController: NSObject, WKNavigationDelegate, WKUIDelegate {
         JSON.stringify({ host: document.documentElement.dataset.host || null,
           tiles: document.querySelectorAll('.section:not(#sec-favoritos) .tile').length,
           logos: Object.keys(window.GH && GH.logos || {}).length,
-          bg: getComputedStyle(document.body).backgroundColor })
+          bg: getComputedStyle(document.body).backgroundColor,
+          sidebar: document.querySelector('.sidebar').getBoundingClientRect().toJSON(),
+          skipBottom: document.querySelector('a.skip').getBoundingClientRect().bottom,
+          webSearchHidden: getComputedStyle(document.getElementById('open-palette')).display === 'none' })
         """
         // give the page's DOMContentLoaded render a beat
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -154,7 +205,24 @@ final class HubController: NSObject, WKNavigationDelegate, WKUIDelegate {
                 check(d["tiles"] as? Int == 37, "37 app tiles rendered")
                 check((d["logos"] as? Int ?? 0) >= 30, "logos manifest loaded")
                 check(d["bg"] as? String == "rgba(0, 0, 0, 0)", "page is transparent over vibrancy")
-                exit(ok && runRouteTests() ? 0 : 1)
+                check((d["skipBottom"] as? Double ?? 1) <= 0, "skip link hidden off-screen")
+                check(d["webSearchHidden"] as? Bool == true, "web search button hidden (native toolbar has it)")
+                check(self.window.toolbar?.items.contains { $0.itemIdentifier == Self.searchItem } == true, "native toolbar has search button")
+                if let sb = d["sidebar"] as? [String: Double], let tl = self.trafficLightsRect() {
+                    print("  sidebar", sb, "lights", tl)
+                    check(tl.minX - sb["left"]! >= 14, "traffic lights ≥14pt inside sidebar left edge")
+                    check(tl.minY - sb["top"]! >= 10, "traffic lights ≥10pt below sidebar top")
+                    check(sb["right"]! - tl.maxX >= 14, "traffic lights clear of sidebar right edge")
+                } else { check(false, "could not measure sidebar/traffic lights") }
+                let passed = ok && runRouteTests()
+                guard passed, let path = self.snapshotPath else { exit(passed ? 0 : 1) }
+                // Capture only this window (no other screen content).
+                let p = Process()
+                p.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
+                p.arguments = ["-o", "-x", "-l", String(self.window.windowNumber), path]
+                try? p.run(); p.waitUntilExit()
+                print("  snapshot", path)
+                exit(0)
             }
         }
     }
@@ -194,11 +262,15 @@ func runRouteTests() -> Bool {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     var hub: HubController!
-    let selfTest = CommandLine.arguments.contains("--selftest")
+    let selfTest = CommandLine.arguments.contains("--selftest") || CommandLine.arguments.contains("--snapshot")
+    var snapshotPath: String? {
+        guard let i = CommandLine.arguments.firstIndex(of: "--snapshot"), i + 1 < CommandLine.arguments.count else { return nil }
+        return CommandLine.arguments[i + 1]
+    }
 
     func applicationDidFinishLaunching(_ note: Notification) {
         buildMenu()
-        hub = HubController(selfTest: selfTest)
+        hub = HubController(selfTest: selfTest, snapshotPath: snapshotPath)
         hub.load()
         hub.window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -215,7 +287,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func reload(_ sender: Any?) { hub.webView.reload() }
     @objc func find(_ sender: Any?) {
         hub.window.makeKeyAndOrderFront(nil)
-        hub.webView.evaluateJavaScript("GH.palette && GH.palette.open()")
+        hub.openSearch(sender)
     }
 
     private func buildMenu() {

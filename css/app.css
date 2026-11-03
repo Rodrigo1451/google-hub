@@ -43,11 +43,11 @@ kbd {
 /* --- Skip link -------------------------------------------------------------- */
 .skip {
   --fx: var(--glass-fx-regular); --depth: var(--shadow-m);
-  position: fixed; left: 16px; top: 12px; z-index: 100;
+  position: fixed; left: 16px; top: var(--skip-top, 12px); z-index: 100;
   padding: 12px 18px; border-radius: 14px;
   background: var(--glass-regular); color: var(--label);
   font-weight: 600; text-decoration: none;
-  transform: translateY(-160%);
+  transform: translateY(calc(-100% - var(--skip-top, 12px) - 24px)); /* fully off-screen, shadow included */
   transition: transform var(--dur) var(--ease);
 }
 .skip:focus { transform: none; }
@@ -286,16 +286,19 @@ main { max-width: 1100px; padding: 0 32px 72px; outline: none; }
   html { scroll-behavior: auto; }
 }
 
-/* --- Native macOS app host (data-host="app" injected by the app) ------------------
-   The window itself is real system vibrancy (NSVisualEffectView), so the page goes
-   transparent and drops its fake wallpaper. The title bar is 28px tall and the
-   traffic lights sit inside the floating sidebar, like Tahoe's apps. */
+/* --- Native macOS app host (index.html?host=app) -----------------------------------
+   The window is real system vibrancy (NSVisualEffectView), so the page goes transparent
+   and drops its fake wallpaper. A unified NSToolbar makes the title bar 52px tall and
+   carries the native search button; the traffic lights sit inside the floating sidebar. */
+:root[data-host="app"] { --titlebar: 52px; --skip-top: 60px; }
 :root[data-host="app"] body { background: transparent; }
 :root[data-host="app"] .wallpaper { display: none; }
-:root[data-host="app"] .sidebar { padding-top: 44px; }
-:root[data-host="app"] .toolbar { padding-top: 34px; }
-:root[data-host="app"] .skip { top: 40px; }
+:root[data-host="app"] .sidebar { top: 8px; margin: 8px 0 8px 8px; height: calc(100vh - 16px); padding-top: 52px; }
+:root[data-host="app"] .search-trigger { display: none; }
+/* empty scroll-edge band under the native title bar: content blurs as it passes beneath */
+:root[data-host="app"] .toolbar { height: var(--titlebar); padding: 0; }
+:root[data-host="app"] { scroll-padding-top: 72px; }
 @media (max-width: 899px) {
-  :root[data-host="app"] .sidebar { padding-top: 6px; margin-top: 36px; }
-  :root[data-host="app"] .toolbar { top: 92px; padding-top: 10px; }
+  :root[data-host="app"] .sidebar { top: var(--titlebar); margin: var(--titlebar) 16px 0; height: auto; padding-top: 6px; }
+  :root[data-host="app"] .toolbar { top: 0; }
 }
