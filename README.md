@@ -9,6 +9,7 @@
 Um launcher nativo para macOS com vidro de verdade, busca estilo Spotlight e atalhos de teclado.<br>
 Cada app abre numa aba do Safari.
 
+[![tests](https://github.com/Rodrigo1451/google-hub/actions/workflows/test.yml/badge.svg)](https://github.com/Rodrigo1451/google-hub/actions/workflows/test.yml)
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-000?logo=apple&logoColor=white)
 ![Swift](https://img.shields.io/badge/Swift-AppKit%20%2B%20WebKit-F05138?logo=swift&logoColor=white)
 ![Sem dependências](https://img.shields.io/badge/runtime-zero%20depend%C3%AAncias-34A853)
@@ -28,14 +29,15 @@ Este projeto foi feito **inteiro numa conversa com o [Claude Code](https://claud
 
 Não escrevi uma linha de código na mão. O plano de implementação que guiou o trabalho está em [`docs/superpowers/plans/`](docs/superpowers/plans/2026-11-02-google-hub-glass-redesign.md), e o histórico de commits conta a evolução do zero até aqui.
 
-Mesmo vibecodado, não é gambiarra: tem **79 testes automatizados**, auditoria de acessibilidade com axe e revisão de código independente.
+Mesmo vibecodado, não é gambiarra: tem **99 testes automatizados** rodando a cada commit no GitHub Actions, auditoria de acessibilidade com axe e revisão de código independente.
 
 ## O que ele faz
 
 - **37 apps do Google** organizados em seções: Trabalho, Comunicação, IA & Pesquisa, Mídia & Lugares, Negócios & Marketing e Conta.
 - **Criar novo com um clique:** documento, planilha, apresentação, formulário, evento, reunião, nota e e-mail.
 - **Favoritos:** passe o mouse e clique na estrela (ou pressione **F**). Reordene com **⌥←** / **⌥→**.
-- **Busca estilo Spotlight (⌘K):** ignora acentos e entende português e inglês ("agenda", "AGÊNDA" e "calendar" acham o mesmo app).
+- **Busca estilo Spotlight (⌘K):** ignora acentos, entende português e inglês ("agenda", "AGÊNDA" e "calendar" acham o mesmo app) e aceita várias palavras ("you music").
+- **Várias contas Google:** escolha no rodapé da barra lateral (1 a 4) qual conta logada abre os apps. Os links ganham `?authuser=N` automaticamente.
 - **Tudo abre no Safari,** nunca dentro do app.
 
 <table>
@@ -70,6 +72,7 @@ Seguindo as diretrizes da Apple (com a skill [`apple-design`](https://github.com
 | <kbd>⌘K</kbd> ou <kbd>⌘F</kbd> ou <kbd>/</kbd> | Buscar apps |
 | <kbd>↑</kbd> <kbd>↓</kbd> + <kbd>↩</kbd> | Escolher e abrir na busca |
 | <kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> <kbd>Home</kbd> <kbd>End</kbd> | Navegar entre os apps |
+| <kbd>Espaço</kbd> ou <kbd>↩</kbd> | Abrir o app focado |
 | <kbd>F</kbd> | Favoritar o app focado |
 | <kbd>⌥←</kbd> <kbd>⌥→</kbd> | Reordenar favoritos |
 | <kbd>⌘R</kbd> | Recarregar |
@@ -102,6 +105,7 @@ css/app.css              Componentes
 js/catalog.js            Catálogo de apps, atalhos de criação e ícones
 js/search.js             Busca com ranking, sem acentos
 js/favorites.js          Favoritos (localStorage, à prova de dados corrompidos)
+js/accounts.js           Conta Google ativa (?authuser=N)
 js/ui.js, grid-nav.js,   Renderização, navegação por teclado e a busca estilo Spotlight
   palette.js
 scripts/                 Baixar logos, compilar o app
@@ -112,9 +116,11 @@ tests/                   Testes unitários (node:test) e de interface (Playwrigh
 
 ```bash
 npm install && npx playwright install webkit
-npm test                                                      # 31 unitários + 48 de interface
+npm test                                                      # 45 unitários + 54 de interface
 ~/Applications/"Google Hub.app"/Contents/MacOS/GoogleHub --selftest   # testa o app nativo
 ```
+
+A CI ([`.github/workflows/test.yml`](.github/workflows/test.yml)) roda tudo isso num Mac do GitHub a cada push, inclusive compilar o app e rodar o self-test.
 
 O `--selftest` abre a janela de verdade, confere a página, mede a posição dos botões da janela em relação à barra lateral e valida o roteamento de links. Com `--snapshot arquivo.png` ele também fotografa a janela.
 

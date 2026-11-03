@@ -1,0 +1,45 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npx playwright install webkit
+
+      - name: Fetch logos
+        run: bash scripts/fetch-logos.sh
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Interface tests (WebKit + axe)
+        run: npm run test:e2e
+
+      - name: Build native app
+        run: APP="$RUNNER_TEMP/Google Hub.app" bash scripts/build-app.sh
+
+      - name: Native self-test
+        run: '"$RUNNER_TEMP/Google Hub.app/Contents/MacOS/GoogleHub" --selftest'
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
