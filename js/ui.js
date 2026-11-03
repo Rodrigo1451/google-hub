@@ -51,8 +51,8 @@
     </li>`;
   };
 
-  const chip = q => `<li><a class="chip" tabindex="0" href="${esc(q.u)}" target="_blank" rel="noopener" aria-label="Criar ${esc(q.n.toLowerCase())} — abre em nova aba">
-      <span class="chip-icon" style="--c:${q.c}" aria-hidden="true">${esc(q.l)}</span>${esc(q.n)}</a></li>`;
+  const chip = q => `<li><a class="chip" tabindex="0" href="${esc(q.u)}" target="_blank" rel="noopener" aria-label="${esc(q.n)} — criar novo em nova aba">
+      <span class="chip-icon" style="--c:${q.c}" data-l="${esc(q.l)}" aria-hidden="true"></span>${esc(q.n)}</a></li>`;
 
   function sectionBody(s) {
     if (s.id === 'favoritos') {

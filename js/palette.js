@@ -47,7 +47,8 @@
   }
 
   function open() {
-    if (dialog.open) return;
+    if (dialog.open && !dialog.classList.contains('closing')) return;
+    if (dialog.open) { dialog.classList.remove('closing'); dialog.close(); }
     opener = document.activeElement;
     input.value = '';
     update();
@@ -55,7 +56,17 @@
     input.focus();
   }
 
-  function close() { if (dialog.open) dialog.close(); }
+  // Exit along the same path it entered (materialize ↔ dematerialize), then really close.
+  function close() {
+    if (!dialog.open || dialog.classList.contains('closing')) return;
+    const anim = getComputedStyle(dialog).animationName;
+    if (!anim || anim === 'none') { dialog.close(); return; }
+    dialog.classList.add('closing');
+    const done = () => { dialog.classList.remove('closing'); dialog.close(); };
+    dialog.addEventListener('animationend', done, { once: true });
+    setTimeout(() => { if (dialog.classList.contains('closing')) done(); }, 400); // safety net
+  }
+  dialog.addEventListener('cancel', e => { e.preventDefault(); close(); });
 
   dialog.addEventListener('close', () => {
     if (opener && opener !== document.body && document.contains(opener)) opener.focus();

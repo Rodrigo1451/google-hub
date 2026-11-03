@@ -1,17 +1,135 @@
-/* Design tokens — plain surfaces for now; Liquid Glass material system lands in Task 6 */
+/* ==========================================================================
+   Google Hub — design tokens (Liquid Glass)
+   Material weight encodes hierarchy: thin (chips, tiles) < regular (toolbar)
+   < thick (sidebar, palette). Bigger surfaces = more blur + deeper shadow.
+   Accessibility media queries only redefine tokens; components never branch.
+   ========================================================================== */
 :root {
-  --bg: #f5f5f7;
-  --surface: #ffffff;
+  color-scheme: light;
+
+  /* wallpaper — static, gives the glass something to refract */
+  --bg: #eef1f6;
+  --blob-1: rgba(66, 133, 244, .42);
+  --blob-2: rgba(52, 168, 83, .30);
+  --blob-3: rgba(251, 188, 5, .32);
+  --blob-4: rgba(234, 67, 53, .24);
+
+  /* glass materials */
+  --glass-thin: rgba(255, 255, 255, .45);
+  --glass-regular: rgba(255, 255, 255, .58);
+  --glass-thick: rgba(246, 246, 248, .72);
+  --glass-sheet: rgba(248, 248, 250, .9); /* modal sheets: legibility over busy content */
+  --glass-hover: rgba(255, 255, 255, .72);
+  --glass-fx-thin: blur(20px) saturate(180%);
+  --glass-fx-regular: blur(30px) saturate(180%);
+  --glass-fx-thick: blur(44px) saturate(180%);
+  --glass-edge: rgba(255, 255, 255, .65);
+  --glass-specular: rgba(255, 255, 255, .85);
+  --glass-hairline: rgba(0, 0, 0, .06);
+  --glass-border: 0 0 0 0 transparent;
+
+  /* depth */
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, .05), 0 4px 12px rgba(0, 0, 0, .05);
+  --shadow-m: 0 2px 6px rgba(0, 0, 0, .06), 0 12px 32px rgba(0, 0, 0, .09);
+  --shadow-l: 0 4px 12px rgba(0, 0, 0, .08), 0 28px 64px rgba(0, 0, 0, .18);
+
+  /* text (vibrancy: high contrast on glass) */
   --label: #1d1d1f;
-  --label-2: rgba(29,29,31,.68);
-  --label-3: rgba(29,29,31,.5);
-  --fill: rgba(118,118,128,.12);
-  --accent: #0071e3;
+  --label-2: rgba(29, 29, 31, .74);
+  --label-3: rgba(29, 29, 31, .56);
+  --fill: rgba(118, 118, 128, .14);
+  --fill-strong: rgba(118, 118, 128, .22);
+
+  --accent: #0066cc;
+  --accent-fill: rgba(0, 113, 227, .14);
+  --selection: #0066cc;
   --focus-ring: #0071e3;
-  --radius-s: 10px; --radius-m: 16px; --radius-l: 22px;
-  --ease: cubic-bezier(.32,.72,0,1);
-  --sidebar-w: 240px;
+  --star: #b45f00;
+  --scrim: rgba(0, 0, 0, .18);
+  --plate: #ffffff;
+
+  /* geometry + motion */
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 22px;
+  --ease: cubic-bezier(.32, .72, 0, 1);
+  --dur: 300ms;
+  --press: 100ms;
+  --sidebar-w: 256px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0b0c10;
+    --blob-1: rgba(66, 133, 244, .34);
+    --blob-2: rgba(52, 168, 83, .20);
+    --blob-3: rgba(251, 188, 5, .14);
+    --blob-4: rgba(234, 67, 53, .18);
+
+    --glass-thin: rgba(255, 255, 255, .06);
+    --glass-regular: rgba(40, 40, 44, .52);
+    --glass-thick: rgba(28, 28, 30, .66);
+    --glass-sheet: rgba(30, 30, 32, .92);
+    --glass-hover: rgba(255, 255, 255, .11);
+    --glass-edge: rgba(255, 255, 255, .12);
+    --glass-specular: rgba(255, 255, 255, .16);
+    --glass-hairline: rgba(255, 255, 255, .06);
+
+    --shadow-s: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 12px rgba(0, 0, 0, .25);
+    --shadow-m: 0 2px 6px rgba(0, 0, 0, .35), 0 12px 32px rgba(0, 0, 0, .4);
+    --shadow-l: 0 4px 12px rgba(0, 0, 0, .4), 0 28px 64px rgba(0, 0, 0, .6);
+
+    --label: #f5f5f7;
+    --label-2: rgba(235, 235, 245, .76);
+    --label-3: rgba(235, 235, 245, .6);
+    --fill: rgba(118, 118, 128, .26);
+    --fill-strong: rgba(118, 118, 128, .36);
+
+    --accent: #4da3ff;
+    --accent-fill: rgba(41, 151, 255, .2);
+    --selection: #0a5fd0;
+    --focus-ring: #4da3ff;
+    --star: #ffb340;
+    --scrim: rgba(0, 0, 0, .42);
+    --plate: #ffffff;
+  }
+}
+
+/* Reduce transparency: frosted → solid. Mirrored under a data attribute so tests can exercise it
+   (Playwright cannot emulate prefers-reduced-transparency). */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-thin: #ffffff; --glass-regular: #ffffff; --glass-thick: #f5f5f7; --glass-sheet: #ffffff; --glass-hover: #f0f0f2;
+    --glass-fx-thin: none; --glass-fx-regular: none; --glass-fx-thick: none;
+    --blob-1: transparent; --blob-2: transparent; --blob-3: transparent; --blob-4: transparent;
+  }
+}
+@media (prefers-reduced-transparency: reduce) and (prefers-color-scheme: dark) {
+  :root { --glass-thin: #1c1c1e; --glass-regular: #1c1c1e; --glass-thick: #161618; --glass-sheet: #1c1c1e; --glass-hover: #2c2c2e; }
+}
+:root[data-a11y-test="reduced-transparency"] {
+  --glass-thin: #ffffff; --glass-regular: #ffffff; --glass-thick: #f5f5f7; --glass-sheet: #ffffff; --glass-hover: #f0f0f2;
+  --glass-fx-thin: none; --glass-fx-regular: none; --glass-fx-thick: none;
+  --blob-1: transparent; --blob-2: transparent; --blob-3: transparent; --blob-4: transparent;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #000; --surface: #1c1c1e; --label: #f5f5f7; --label-2: rgba(235,235,245,.7); --label-3: rgba(235,235,245,.5); --fill: rgba(118,118,128,.24); --accent: #2997ff; --focus-ring: #2997ff; }
+  :root[data-a11y-test="reduced-transparency"] { --glass-thin: #1c1c1e; --glass-regular: #1c1c1e; --glass-thick: #161618; --glass-sheet: #1c1c1e; --glass-hover: #2c2c2e; }
+}
+
+/* Increase contrast: near-solid surfaces with a defined border. */
+@media (prefers-contrast: more) {
+  :root {
+    --glass-thin: #ffffff; --glass-regular: #ffffff; --glass-thick: #ffffff; --glass-sheet: #ffffff; --glass-hover: #f0f0f2;
+    --glass-fx-thin: none; --glass-fx-regular: none; --glass-fx-thick: none;
+    --glass-border: 0 0 0 1px #1d1d1f;
+    --label-2: #1d1d1f; --label-3: #3a3a3c;
+  }
+}
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root {
+    --glass-thin: #000; --glass-regular: #000; --glass-thick: #000; --glass-sheet: #000; --glass-hover: #1c1c1e;
+    --glass-border: 0 0 0 1px #f5f5f7;
+    --label-2: #f5f5f7; --label-3: #d1d1d6;
+  }
 }
