@@ -47,8 +47,8 @@
   }
 
   function open() {
-    if (dialog.open && !dialog.classList.contains('closing')) return;
-    if (dialog.open) { dialog.classList.remove('closing'); dialog.close(); }
+    if (isShowing()) return;
+    if (pendingClose) { finishClose(); dialog.close(); }
     opener = document.activeElement;
     input.value = '';
     update();
@@ -57,15 +57,30 @@
   }
 
   // Exit along the same path it entered (materialize ↔ dematerialize), then really close.
+  // A pending close is a single cancellable unit: reopening or finishing detaches both its listener and its timer.
+  let pendingClose = null;
+  function finishClose() {
+    if (!pendingClose) return;
+    dialog.removeEventListener('animationend', pendingClose.onEnd);
+    clearTimeout(pendingClose.timer);
+    pendingClose = null;
+    dialog.classList.remove('closing');
+  }
   function close() {
-    if (!dialog.open || dialog.classList.contains('closing')) return;
+    if (!dialog.open || pendingClose) return;
     const anim = getComputedStyle(dialog).animationName;
     if (!anim || anim === 'none') { dialog.close(); return; }
     dialog.classList.add('closing');
-    const done = () => { dialog.classList.remove('closing'); dialog.close(); };
-    dialog.addEventListener('animationend', done, { once: true });
-    setTimeout(() => { if (dialog.classList.contains('closing')) done(); }, 400); // safety net
+    const onEnd = e => {
+      if (e.target !== dialog || !/^(dematerialize|fade-out)$/.test(e.animationName)) return;
+      finishClose(); dialog.close();
+    };
+    // Safety net for hidden tabs, where animations never finish.
+    const timer = setTimeout(() => { finishClose(); dialog.close(); }, 400);
+    pendingClose = { onEnd, timer };
+    dialog.addEventListener('animationend', onEnd);
   }
+  const isShowing = () => dialog.open && !pendingClose;
   dialog.addEventListener('cancel', e => { e.preventDefault(); close(); });
 
   dialog.addEventListener('close', () => {
@@ -96,8 +111,8 @@
   document.getElementById('open-palette').addEventListener('click', open);
   document.addEventListener('keydown', e => {
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName);
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); dialog.open ? close() : open(); }
-    else if (e.key === '/' && !typing && !dialog.open) { e.preventDefault(); open(); }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); isShowing() ? close() : open(); }
+    else if (e.key === '/' && !typing && !isShowing()) { e.preventDefault(); open(); }
   });
 
   GH.palette = { open, close };

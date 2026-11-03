@@ -140,6 +140,10 @@
     lockUntilUserScroll = true;
     setCurrent(a.dataset.nav);
     target.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'start' });
+    // Move keyboard focus with the view (WCAG 2.4.3): the section's tab-stop tile, else its first control, else the heading.
+    const dest = target.querySelector('.tile[tabindex="0"], a[tabindex="0"]') || target.querySelector('h2');
+    if (dest.tagName === 'H2') dest.setAttribute('tabindex', '-1');
+    dest.focus({ preventScroll: true });
     history.replaceState(null, '', '#sec-' + a.dataset.nav);
   });
 
