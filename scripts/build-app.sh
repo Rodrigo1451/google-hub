@@ -3,7 +3,7 @@
 # every Google link opens in Safari.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APP="$HOME/Applications/Google Hub.app"
+APP="${APP:-$HOME/Applications/Google Hub.app}"   # override with APP=/path/To.app
 
 [ -f "$ROOT/logos/manifest.js" ] || bash "$ROOT/scripts/fetch-logos.sh"
 
