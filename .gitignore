@@ -1,0 +1,5 @@
+node_modules/
+logos/
+test-results/
+playwright-report/
+.superpowers/
