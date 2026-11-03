@@ -25,3 +25,6 @@ test('save on a throwing storage does not throw', () =>
   assert.doesNotThrow(() => F.save({ setItem() { throw new Error('quota'); } }, ['a'])));
 test('load on a throwing storage gives defaults', () =>
   assert.deepEqual(F.load({ getItem() { throw new Error('denied'); } }, ids), F.DEFAULT_FAVS));
+test('list of only unknown ids (catalog rename) falls back to defaults', () =>
+  assert.deepEqual(F.parse('["oldid","gone"]', ids), F.DEFAULT_FAVS));
+test('empty list still stays empty after the rename rule', () => assert.deepEqual(F.parse('[]', ids), []));

@@ -9,6 +9,8 @@
   /* ---------- state ---------- */
   const storage = (() => { try { return window.localStorage; } catch { return null; } })();
   let favs = GH.favs.load(storage, APPS.map(a => a.id));
+  let account = GH.accounts.load(storage);
+  const urlFor = url => GH.accounts.withAccount(url, account);
 
   /* ---------- icons ---------- */
   const glyph = (k, cls = '') =>
@@ -43,7 +45,7 @@
   const tile = app => {
     const on = favs.includes(app.id);
     return `<li class="cell">
-      <a class="tile" tabindex="0" data-id="${app.id}" href="${esc(app.u)}" target="_blank" rel="noopener" aria-label="Abrir ${esc(app.n)} em nova aba" title="${esc(app.d)}">
+      <a class="tile" tabindex="0" data-id="${app.id}" href="${esc(urlFor(app.u))}" target="_blank" rel="noopener" aria-label="Abrir ${esc(app.n)} em nova aba" title="${esc(app.d)}">
         <span class="tile-icon">${appIcon(app)}</span>
         <span class="tile-label">${esc(app.n)}</span>
       </a>
@@ -51,7 +53,7 @@
     </li>`;
   };
 
-  const chip = q => `<li><a class="chip" tabindex="0" href="${esc(q.u)}" target="_blank" rel="noopener" aria-label="${esc(q.n)} — criar novo em nova aba">
+  const chip = q => `<li><a class="chip" tabindex="0" href="${esc(urlFor(q.u))}" target="_blank" rel="noopener" aria-label="${esc(q.n)} — criar novo em nova aba">
       <span class="chip-icon" style="--c:${q.c}" data-l="${esc(q.l)}" aria-hidden="true"></span>${esc(q.n)}</a></li>`;
 
   function sectionBody(s) {
@@ -147,6 +149,23 @@
     history.replaceState(null, '', '#sec-' + a.dataset.nav);
   });
 
+  /* ---------- Google account picker ---------- */
+  function renderAccounts() {
+    $('#account-options').innerHTML = Array.from({ length: GH.accounts.COUNT }, (_, i) => `
+      <label class="seg" title="${i ? `Conta ${i + 1} logada no navegador` : 'Conta padrão do navegador'}">
+        <input type="radio" name="account" value="${i}" tabindex="${i === account ? 0 : -1}" ${i === account ? 'checked' : ''} aria-label="Conta ${i + 1}${i ? '' : ' (padrão)'}">
+        <span aria-hidden="true">${i + 1}</span>
+      </label>`).join('');
+  }
+  document.addEventListener('change', e => {
+    if (e.target.name !== 'account') return;
+    account = Number(e.target.value);
+    GH.accounts.save(storage, account);
+    document.querySelectorAll('input[name="account"]').forEach(r => r.setAttribute('tabindex', r.checked ? '0' : '-1'));
+    render();
+    announce(`Os apps agora abrem na conta ${account + 1}`);
+  });
+
   /* ---------- greeting ---------- */
   function greet() {
     const h = new Date().getHours();
@@ -158,13 +177,13 @@
   /* ---------- public ---------- */
   window.GH.ui = {
     afterRender: [],
-    render, announce, toggleFav, setFavs, appIcon, slug, esc,
+    render, announce, toggleFav, setFavs, appIcon, slug, esc, urlFor,
     get favs() { return favs; },
     byId,
   };
 
   document.addEventListener('DOMContentLoaded', () => {
-    greet(); renderNav(); render(); spy();
+    greet(); renderNav(); renderAccounts(); render(); spy();
     document.dispatchEvent(new CustomEvent('gh:ready'));
   });
 })();

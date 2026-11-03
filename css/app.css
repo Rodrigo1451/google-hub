@@ -302,3 +302,20 @@ main { max-width: 1100px; padding: 0 32px 72px; outline: none; }
   :root[data-host="app"] .sidebar { top: var(--titlebar); margin: var(--titlebar) 16px 0; height: auto; padding-top: 6px; }
   :root[data-host="app"] .toolbar { top: 0; }
 }
+
+/* --- Google account picker: macOS segmented control at the bottom of the sidebar --- */
+.sidebar { display: flex; flex-direction: column; }
+.account { margin-top: auto; padding: 16px 10px 4px; display: grid; gap: 8px; }
+.account-label { font-size: .75rem; font-weight: 600; color: var(--label-2); letter-spacing: .01em; }
+.account-hint { font-size: .75rem; color: var(--label-2); }
+.segmented { display: grid; grid-template-columns: repeat(4, 1fr); padding: 2px; border-radius: 12px; background: var(--fill); }
+.seg { position: relative; display: grid; place-items: center; min-height: 44px; border-radius: 10px; font-weight: 600; font-size: .9375rem; color: var(--label); cursor: default; transition: background 160ms var(--ease), box-shadow 160ms var(--ease); }
+.seg input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: default; }
+.seg:has(input:checked) { background: var(--glass-hover); box-shadow: 0 1px 3px rgba(0, 0, 0, .12), inset 0 0 0 .5px var(--glass-edge); }
+.seg:has(input:focus-visible) { outline: 3px solid var(--focus-ring); outline-offset: 1px; }
+@media (max-width: 899px) {
+  .sidebar { flex-direction: row; }
+  .account { margin: 0 0 0 auto; padding: 0; grid-auto-flow: column; align-items: center; }
+  .account-label, .account-hint { display: none; }
+  .segmented { width: 176px; }
+}

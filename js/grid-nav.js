@@ -27,6 +27,15 @@
     if (grid) { remembered[grid.dataset.grid] = tile.dataset.id; tilesOf(grid).forEach(t => t.setAttribute('tabindex', t === tile ? '0' : '-1')); }
   });
 
+  // Space activates tiles and chips like Enter (Finder/Launchpad), instead of scrolling the page.
+  document.addEventListener('keydown', e => {
+    if (e.key !== ' ' || e.metaKey || e.ctrlKey || e.altKey) return;
+    const link = e.target.closest?.('.tile, .chip');
+    if (!link) return;
+    e.preventDefault();
+    link.click();
+  });
+
   document.addEventListener('keydown', e => {
     const tile = e.target.closest?.('.tile');
     const grid = tile?.closest('[data-grid]');

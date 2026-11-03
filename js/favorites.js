@@ -7,7 +7,9 @@
     try { list = JSON.parse(raw); } catch { return [...DEFAULT_FAVS]; }
     if (!Array.isArray(list)) return [...DEFAULT_FAVS];
     const valid = new Set(validIds);
-    return [...new Set(list)].filter(id => valid.has(id));
+    const kept = [...new Set(list)].filter(id => valid.has(id));
+    // A deliberately empty list stays empty; a list whose ids all vanished (catalog rename) gets defaults.
+    return list.length && !kept.length ? [...DEFAULT_FAVS] : kept;
   }
 
   const toggle = (list, id) => list.includes(id) ? list.filter(x => x !== id) : [...list, id];

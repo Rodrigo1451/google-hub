@@ -42,7 +42,7 @@
 
   function launch(app) {
     if (!app) return;
-    window.open(app.u, '_blank', 'noopener');
+    window.open(ui.urlFor(app.u), '_blank', 'noopener');
     close();
   }
 

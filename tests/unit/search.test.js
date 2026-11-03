@@ -14,3 +14,7 @@ test('"you" ranks youtube then ytmusic first', () =>
   assert.deepEqual(rank(APPS, 'you').map(a => a.id).slice(0, 2), ['youtube', 'ytmusic']));
 test('blank query returns nothing', () => assert.equal(rank(APPS, '   ').length, 0));
 test('no match returns nothing', () => assert.equal(rank(APPS, 'zzzz').length, 0));
+test('multi-word query matches words in any field', () => assert.equal(top('you music'), 'ytmusic'));
+test('multi-word query needs every word to match', () => assert.equal(rank(APPS, 'you zzzz').length, 0));
+test('"google ads" finds Google Ads first', () => assert.equal(top('google ads'), 'ads'));
+test('extra spaces between words are ignored', () => assert.equal(top('  you   music '), 'ytmusic'));
